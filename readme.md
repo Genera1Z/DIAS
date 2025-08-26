@@ -147,7 +147,7 @@ If you are **applying OCL (not limited to this repo) to tasks like visual questi
 
 
 
-### Citation
+## Citation
 
 If you find this repo useful, please cite our work.
 ```
