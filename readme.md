@@ -152,7 +152,7 @@ If you are **applying OCL (not limited to this repo) to tasks like visual questi
 If you find this repo useful, please cite our work.
 ```
 @article{zhao2025dias,
-  title={{Vector-Quantized Vision Foundation Models for Object-Centric Learning}},
+  title={{Slot Attention with Re-Initialization and Self-Distillation}},
   author={Zhao, Rongzhen and Zhao, Yi and Kannala, Juho and Pajarinen, Joni},
   journal={ACM MM},
   year={2025}
