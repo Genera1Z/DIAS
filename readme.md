@@ -46,7 +46,9 @@ For my implementation of baseline methods, please visit the repos as below: [TOD
 
 ## Converted Datasets 🚀
 
-Datasets ClevrTex, COCO and VOC should be converted into LMDB format, which works best on computing clusters. The converted dataset files are available as [releases](https://github.com/Genera1Z/DIAS/releases).
+Datasets ClevrTex, COCO and VOC should be converted into LMDB format, which works best on computing clusters. 
+The converted dataset files are available as [releases](https://github.com/Genera1Z/DIAS/releases).
+You can download them and use them off-the-shelf in this repo.
 - [dataset-clevrtex](https://github.com/Genera1Z/VQ-VFM-OCL/releases/tag/dataset-clevrtex): converted dataset [ClevrTex](https://www.robots.ox.ac.uk/~vgg/data/clevrtex).
 - [dataset-coco](https://github.com/Genera1Z/VQ-VFM-OCL/releases/tag/dataset-coco): converted dataset [COCO](https://cocodataset.org).
 - [dataset-voc](https://github.com/Genera1Z/VQ-VFM-OCL/releases/tag/dataset-voc): converted dataset [VOC](http://host.robots.ox.ac.uk/pascal/VOC).
