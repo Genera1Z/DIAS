@@ -55,7 +55,10 @@ Converted datasets, including ClevrTex, COCO, VOC and MOVi-D are available as [r
 
 ## Model Checkpoints 🌟
 
-***The checkpoints for all the models in the two tables above*** are available as [releases](https://github.com/Genera1Z/VQ-VFM-OCL/releases). [TODO upload checkpoints at random seeds 42/43/44]
+***The checkpoints for all the models in the two tables above*** are available as [releases](https://github.com/Genera1Z/DIAS/releases).
+- [dias_r-clevrtex](https://github.com/Genera1Z/DIAS/releases/tag/dias_r-clevrtex): model checkpoints and train/val logs of DIAS trained on datasets CLEVRTEX, under three random seeds 42, 43 and 44.
+- [dias_r-coco](https://github.com/Genera1Z/DIAS/releases/tag/dias_r-coco): model checkpoints and train/val logs of DIAS trained on datasets MS COCO, under three random seeds 42, 43 and 44.
+- [dias_r-voc](https://github.com/Genera1Z/DIAS/releases/tag/dias_r-voc): model checkpoints and train/val logs of DIAS trained on datasets Pascal VOC, under three random seeds 42, 43 and 44.
 
 
 
