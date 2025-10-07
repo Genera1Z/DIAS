@@ -41,8 +41,8 @@ from object_centric_bench.model import (
     TransformerDecoder,
     TransformerDecoderLayer,
 )
-from object_centric_bench.utils import Compose
-from object_centric_bench.utils_model import interpolat_argmax_attent
+from object_centric_bench.util import Compose
+from object_centric_bench.util_model import interpolat_argmax_attent
 
 ### global
 

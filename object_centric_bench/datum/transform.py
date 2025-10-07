@@ -6,7 +6,7 @@ import torch as pt
 import torch.nn.functional as ptnf
 import torchvision.transforms.v2 as ptvt2
 
-from ..utils import DictTool
+from ..util import DictTool
 
 
 # TODO XXX all subclass nn.Module TODO XXX

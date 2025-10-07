@@ -1,4 +1,4 @@
-from ..utils import Compose
+from ..util import Compose
 
 
 class Callback:

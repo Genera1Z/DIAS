@@ -6,8 +6,8 @@ import torch as pt
 import torch.nn as nn
 import torch.nn.functional as ptnf
 
-from ..utils import DictTool
-from ..utils_learn import intersection_over_union, hungarian_matching
+from ..util import DictTool
+from ..util_learn import intersection_over_union, hungarian_matching
 
 
 class MetricWrap(nn.Module):
@@ -33,6 +33,7 @@ class MetricWrap(nn.Module):
             #     kwds = {k: v.detach() for k, v in kwds.items()}
             if "transform" in value:
                 kwds = value["transform"](**kwds)
+            assert isinstance(value["metric"], Metric)
             metric = value["metric"](**kwds)  # (loss/acc, valid)
             if "weight" in value:
                 metric = (metric[0] * value["weight"], metric[1])

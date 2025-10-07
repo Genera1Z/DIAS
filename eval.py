@@ -6,10 +6,10 @@ import torch as pt
 import torch.nn.functional as ptnf
 
 from object_centric_bench.datum import DataLoader
-from object_centric_bench.utils_datum import draw_segmentation_np
+from object_centric_bench.util_datum import draw_segmentation_np
 from object_centric_bench.learn import MetricWrap
 from object_centric_bench.model import ModelWrap
-from object_centric_bench.utils import Config, build_from_config
+from object_centric_bench.util import Config, build_from_config
 
 
 @pt.inference_mode()
@@ -107,9 +107,9 @@ def main(
     # cfg_file="config-dias/dias_r-clevrtex.py",
     # cfg_file="config-dias/dias_r-coco.py",
     cfg_file="config-dias/dias_r-voc.py",
-    # ckpt_file="../_20250620-dias0_randsfq_smoothsa-ckpt/20250620-dias0_randsfq_smoothsa-dias/save/dias_r-clevrtex/42-0029.pth",
-    # ckpt_file="../_20250620-dias0_randsfq_smoothsa-ckpt/20250620-dias0_randsfq_smoothsa-dias/save/dias_r-coco/42-0027.pth",
-    ckpt_file="../_20250620-dias0_randsfq_smoothsa-ckpt/20250620-dias0_randsfq_smoothsa-dias/save/dias_r-voc/42-0529.pth",
+    # ckpt_file="../dias_r-clevrtex/42-0029.pth",
+    # ckpt_file="../dias_r-coco/42-0027.pth",
+    ckpt_file="../dias_r-voc/42-0529.pth",
 ):
     data_dir = "/media/GeneralZ/Storage/Static/datasets"  # TODO XXX
     pt.backends.cudnn.benchmark = True

@@ -10,7 +10,7 @@ import torch as pt
 import torch.nn as nn
 import torch.nn.functional as ptnf
 
-from ..utils import DictTool
+from ..util import DictTool
 
 
 ####
@@ -32,7 +32,6 @@ class ModelWrap(nn.Module):  # TODO XXX TensorDictModule
         self.imap = imap if isinstance(imap, dict) else {_: _ for _ in imap}
         self.omap = omap
 
-    # @pt.compile
     # def forward(self, input: dict) -> dict:
     def forward(self, **pack: dict) -> dict:
         # input2 = {k: input[v] for k, v in self.imap.items()}

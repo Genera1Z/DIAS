@@ -446,3 +446,21 @@ def get_subclass_method_keys(obj, superclass):
         for attr in dir(obj)
         if callable(getattr(obj, attr)) and not hasattr(superclass, attr)
     ]
+
+
+def add_hook_to_staticmethod(cls, method_name, hook):
+    old_method = getattr(cls, method_name)
+
+    # unwrap staticmethod into underlying function if needed
+    if isinstance(old_method, staticmethod):
+        old_func = old_method.__func__
+    else:
+        old_func = old_method
+
+    def wrapped(*args, **kwargs):
+        result = old_func(*args, **kwargs)
+        hook(result)  # run hook at the end
+        return result
+
+    # reassign as staticmethod
+    setattr(cls, method_name, staticmethod(wrapped))

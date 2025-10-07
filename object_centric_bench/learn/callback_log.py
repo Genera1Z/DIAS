@@ -40,10 +40,10 @@ class AverageLog(Callback):
         avg_dict = {}
         for k, v in self.current_dict.items():
             metric, valid = list(zip(*v))
-            metric = np.concat(metric, 0)  # concat all batches  # (b,..)
-            valid = np.concat(valid, 0)  # (b,)
+            metric = np.concatenate(metric, 0)  # concat all batches  # (b,..)
+            valid = np.concatenate(valid, 0)  # (b,)
             metric2 = metric[valid]  # keep the valid ones  # (?,..)
-            v2 = metric2.mean(0).round(8)  # there must be valid samples
+            v2 = metric2.mean(0)  # .round(8) can cause nan
             avg_dict[k] = v2.tolist()
         if self.log_file:
             __class__.save(self.idx, avg_dict, self.log_file)

@@ -8,7 +8,7 @@ import numpy as np
 import torch as pt
 import torch.utils.data as ptud
 
-from ..utils_datum import rgb_segment_to_index_segment, draw_segmentation_np
+from ..util_datum import rgb_segment_to_index_segment, draw_segmentation_np
 
 
 class PascalVOC(ptud.Dataset):

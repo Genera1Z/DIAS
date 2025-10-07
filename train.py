@@ -11,7 +11,7 @@ import tqdm
 from object_centric_bench.datum import DataLoader
 from object_centric_bench.learn import MetricWrap
 from object_centric_bench.model import ModelWrap
-from object_centric_bench.utils import Config, build_from_config
+from object_centric_bench.util import Config, build_from_config
 
 
 def train_epoch(pack):
@@ -31,12 +31,15 @@ def train_epoch(pack):
             pack.output = pack.model(**pack)
             [_.after_forward(**pack) for _ in pack.callback_t]
             pack.loss = pack.loss_fn(**pack)  # {k:(loss,valid),..}
+        # for pack.loss/acc
+        # - value: dtype=float, shape=(b,). but actually (b=1,) for loss
+        # - valid: dtype=bool, shape=(b,). but actually (b=1,) for loss
         pack.acc = pack.acc_fn_t(**pack)  # in autocast may cause inf
 
         flag = True
         for loss_i, valid_i in pack.loss.values():
             if valid_i.sum() == 0:
-                print("no valid sample in batch")
+                print("no valid sample in batch")  # then will not back prop
                 flag = False
                 break
 
@@ -177,11 +180,11 @@ def main(args):
     optimiz.gclip = build_from_config(cfg.gclip)
 
     loss_fn = MetricWrap(**build_from_config(cfg.loss_fn))
-    # loss_fn.compile()
+    # loss_fn.compile()  # sometimes nan ???
     acc_fn_t = MetricWrap(detach=True, **build_from_config(cfg.acc_fn_t))
     acc_fn_v = MetricWrap(detach=True, **build_from_config(cfg.acc_fn_v))
-    # acc_fn_t.compile()
-    # acc_fn_v.compile()
+    # acc_fn_t.compile()  # sometimes nan ???
+    # acc_fn_v.compile()  # sometimes nan ???
 
     for cb in cfg.callback_t + cfg.callback_v:
         if cb.type.__name__ == "AverageLog":
@@ -255,5 +258,5 @@ def parse_args():
 
 if __name__ == "__main__":
     # with pt.autograd.detect_anomaly(True):  # detect NaN
-    pt._dynamo.config.suppress_errors = True  # XXX one_hot, interplolate
+    pt._dynamo.config.suppress_errors = True  # one_hot, interplolate
     main(parse_args())
