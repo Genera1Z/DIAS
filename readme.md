@@ -61,14 +61,7 @@ For my implementation of baseline methods and their model checkpoints, please vi
 - requirements.txt
 ```
 
-[Releases 1](https://github.com/Genera1Z/VQ-VFM-OCL/releases).
-```shell
-- dataset-clevrtex/     # dataset files in LMDB format
-- dataset-coco/
-- dataset-voc/
-```
-
-[Releases 2](https://github.com/Genera1Z/DIAS/releases).
+[Releases](https://github.com/Genera1Z/DIAS/releases).
 ```shell
 - dias_r-clevrtex/      # our DIAS models and logs
 - dias_r-coco/
