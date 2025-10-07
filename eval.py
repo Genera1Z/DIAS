@@ -3,7 +3,6 @@ from pathlib import Path
 import cv2
 import numpy as np
 import torch as pt
-import torch.nn.functional as ptnf
 
 from object_centric_bench.datum import DataLoader
 from object_centric_bench.util_datum import draw_segmentation_np
@@ -61,21 +60,12 @@ def val_epoch(cfg, dataset_v, model, loss_fn, acc_fn_v, callback_v):
             imgs_gt = (  # image video
                 (pack.batch[img_key] * std.cuda() + mean.cuda()).clip(0, 255).byte()
             )
-            segs_gt = pack.batch["segment"]
+            segs_gt = pack.batch["segment"].argmax(-1)  # onehot seg -> number seg
             # read pd attent -> pd segment
-            segs_pd = pack.output["attent"]
-            if is_img:
-                segs_pd = ptnf.interpolate(
-                    segs_pd, cfg.resolut0, mode="bilinear"
-                ).argmax(1)
+            if "segment2" in pack.output:
+                segs_pd = pack.output["segment2"].argmax(-1)
             else:
-                segs_pd = (
-                    ptnf.interpolate(
-                        segs_pd.flatten(0, 1), cfg.resolut0, mode="bilinear"
-                    )
-                    .argmax(1)
-                    .unflatten(0, [imgs_gt.size(0), -1])
-                )
+                segs_pd = pack.output["segment"].argmax(-1)
             # visualize gt image or video
             for img_gt, seg_gt, seg_pd in zip(imgs_gt, segs_gt, segs_pd):
                 if is_img:
