@@ -2,9 +2,66 @@ from io import BytesIO
 import colorsys
 
 import av
+import cv2
 import numpy as np
 import torch as pt
 import torchvision.utils as ptvu
+import torch.nn.functional as ptnf
+
+
+def normaliz_for_visualiz(image: np.ndarray):
+    return (image - image.min()) / (image.max() - image.min())
+
+
+def even_resize_and_center_crop(image: np.ndarray, size: int, interp=cv2.INTER_LINEAR):
+    h0, w0 = image.shape[:2]
+    ratio = size / min(h0, w0)
+    image2 = cv2.resize(image, dsize=None, fx=ratio, fy=ratio, interpolation=interp)
+    h2, w2 = image2.shape[:2]
+    t = (h2 - size) // 2
+    l = (w2 - size) // 2
+    b = t + size
+    r = l + size
+    output = image2[t:b, l:r]
+    return output
+
+
+def calc_foreground_center_bbox(segment_index, haxis=-2, waxis=-1):
+    """
+    segment_index: in shape (..,h,w)
+    """
+    foreground = segment_index > 0
+    _, y, x = np.where(foreground)
+    l = x.min()
+    t = y.min()
+    r = x.max()
+    b = y.max()
+    cx, cy = (l + r) / 2, (t + b) / 2
+    h, w = segment_index.shape[haxis], segment_index.shape[waxis]
+    side = min(h, w)
+    lobe = side / 2
+    if h == w:
+        bbox = [0, 0, w, h]
+    elif h < w:
+        bbox = [cx - lobe, 0, cx + lobe, h]
+    else:  # h > w
+        bbox = [0, cy - lobe, w, cy + lobe]
+    bbox = np.round(bbox).astype("int32")
+    if bbox[0] < 0:
+        bbox[0] = 0
+        bbox[2] = side
+    if bbox[1] < 0:
+        bbox[1] = 0
+        bbox[3] = side
+    if bbox[2] > w:
+        bbox[2] = w
+        bbox[0] = w - side
+    if bbox[3] > h:
+        bbox[3] = h
+        bbox[1] = h - side
+    assert np.all(bbox[:2] >= 0) and (bbox[2] <= w) and (bbox[3] <= h)
+    assert np.all(bbox[2:] - bbox[:2] == np.array([side] * 2))
+    return bbox
 
 
 def rgb_segment_to_index_segment(segment_rgb: np.ndarray):
@@ -23,25 +80,23 @@ def rgb_segment_to_index_segment(segment_rgb: np.ndarray):
     return segment_idx
 
 
-def mask_segment_to_bbox_np(segment):
+def index_segment_to_bbox(segment_idx: np.ndarray):
     """
-    - segment: mask format, shape=(h,w,s)
-    - bbox: ltrb format, shape=(s,c=4)
+    segment_idx: shape=(h,w)
+    bbox: shape=(n,c=4), ltrb
     """
-    assert segment.ndim == 3 and segment.dtype == np.bool
-    h, w, s = segment.shape
-    y = np.arange(h)[:, None, None]
-    x = np.arange(w)[None, :, None]
-    l = np.amin(np.where(segment, x, np.inf), (0, 1))
-    t = np.amin(np.where(segment, y, np.inf), (0, 1))
-    r = np.amax(np.where(segment, x, -np.inf), (0, 1))
-    b = np.amax(np.where(segment, y, -np.inf), (0, 1))
-    bbox = np.stack([l, t, r, b], 1)
-    valid = segment.any((0, 1))
-    bbox[~valid] = 0
-    bbox = bbox.astype("int32")
-    # assert ((l <= r) & (t <= b)).all()  # has strange error for float64
-    assert (bbox[:, :2] <= bbox[:, 2:]).all()  # left-closed and right-closed
+    assert segment_idx.ndim == 2 and segment_idx.dtype == np.uint8
+    idxs = np.unique(segment_idx).tolist()
+    idxs.sort()
+    if 0 in idxs:
+        idxs.remove(0)  # not include the bbox for background
+    bbox = np.zeros([len(idxs), 4], dtype="float32")
+    for i, idx in enumerate(idxs):
+        y, x = np.where(segment_idx == idx)
+        bbox[i, 0] = np.min(x)  # left
+        bbox[i, 1] = np.min(y)  # top
+        bbox[i, 2] = np.max(x)  # right
+        bbox[i, 3] = np.max(y)  # bottom
     return bbox
 
 
@@ -51,26 +106,26 @@ def generate_spectrum_colors(num_color):
         hue = i / float(num_color)
         rgb = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
         spectrum.append([int(255 * c) for c in rgb])
-    return np.array(spectrum, dtype="uint8")  # (s,c=3)
+    return np.array(spectrum, dtype="uint8")  # (n,c=3)
 
 
-def draw_segmentation_np(image: np.ndarray, segment: np.ndarray, alpha=0.5, color=None):
+def draw_segmentation_np(
+    image: np.ndarray, segment: np.ndarray, max_num=0, alpha=0.5, colors=None
+):
     """
-    - image: shape=(h,w,c)
-    - segment: shape=(h,w,s), dtype=bool; in mask format, not index format
-    - color: shape=(s,c=3)
+    image: in shape (h,w,c)
+    segment: in shape (h,w)
     """
-    h, w, c = image.shape
-    h2, w2, s = segment.shape
-    assert h == h2 and w == w2
-
-    if color is None:
-        color = generate_spectrum_colors(s)
+    if not max_num:
+        max_num = int(segment.max() + 1)
+    if colors is None:
+        colors = generate_spectrum_colors(max_num)  # len(np.unique(segment))
+    mask = ptnf.one_hot(pt.from_numpy(segment.astype("int64")), max_num)
     image2 = ptvu.draw_segmentation_masks(
         image=pt.from_numpy(image).permute(2, 0, 1),
-        masks=pt.from_numpy(segment).permute(2, 0, 1),
+        masks=mask.bool().permute(2, 0, 1),
         alpha=alpha,
-        colors=color.tolist(),
+        colors=colors.tolist(),
     )
     return image2.permute(1, 2, 0).numpy()
 

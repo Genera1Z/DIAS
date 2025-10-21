@@ -6,7 +6,6 @@ import cv2
 import lmdb
 import numpy as np
 import torch as pt
-import torch.nn.functional as ptnf
 import torch.utils.data as ptud
 
 from ..util_datum import rgb_segment_to_index_segment, draw_segmentation_np
@@ -16,20 +15,15 @@ class ClevrTex(ptud.Dataset):
     """ClevrTex: A Texture-Rich Benchmark for Unsupervised Multi-Object Segmentation
     https://www.robots.ox.ac.uk/~vgg/data/clevrtex
 
-    Example
-    ```
-    dataset = ClevrTex(
-        data_file="clevrtex/train.lmdb",
-        extra_keys=["segment", "depth"],
-        base_dir=Path("/media/GeneralZ/Storage/Static/datasets"),
-    )
-    for sample in dataset:
-        dataset.visualiz(
-            image=sample["image"].permute(1, 2, 0).numpy(),
-            segment=sample["segment"].numpy(),
-            depth=sample["depth"].numpy(),
-        )
-    ```
+    Original Version (train)
+    - ClevrTex (part 1, 4.7 GB)
+    - ClevrTex (part 2, 4.7 GB)
+    - ClevrTex (part 3, 4.7 GB)
+    - ClevrTex (part 4, 4.7 GB)
+    - ClevrTex (part 5, 4.7 GB)
+
+    Also its variant (val)
+    - ClevrTex-OOD test set (5.3 GB)
     """
 
     def __init__(
@@ -56,11 +50,11 @@ class ClevrTex(ptud.Dataset):
         self.extra_keys = extra_keys
         self.transform = transform
 
-    def __getitem__(self, index):
+    def __getitem__(self, index, compact=True):
         """
-        - image: shape=(c=3,h,w), uint8 | float32
-        - segment: shape=(h,w,s), uint8 -> bool
-        - depth: shape=(h,w), uint8 | float32
+        - image: shape=(c=3,h,w), uint8
+        - segment: shape=(h,w), uint8
+        - depth: shape=(h,w), uint8
         """
         with self.env.begin(write=False) as txn:
             sample0 = pkl.loads(txn.get(self.idxs[index]))
@@ -73,25 +67,27 @@ class ClevrTex(ptud.Dataset):
             cv2.COLOR_BGR2RGB,
         )
         image = pt.from_numpy(image0).permute(2, 0, 1)
-        sample1["image"] = image  # (c,h,w) uint8
+        sample1["image"] = image
 
         if "segment" in self.extra_keys:
             segment = pt.from_numpy(
                 cv2.imdecode(sample0["segment"], cv2.IMREAD_GRAYSCALE)
             )
-            sample1["segment"] = segment  # (h,w) uint8
+            sample1["segment"] = segment
 
         if "depth" in self.extra_keys:
             depth = pt.from_numpy(cv2.imdecode(sample0["depth"], cv2.IMREAD_GRAYSCALE))
-            sample1["depth"] = depth  # (h,w) uint8
+            sample1["depth"] = depth
 
         sample2 = self.transform(**sample1)
 
         if "segment" in self.extra_keys:
-            segment2 = sample2["segment"]  # index format
-            segment3 = ptnf.one_hot(segment2.long()).bool()  # mask format
-
-            sample2["segment"] = segment3  # (h,w,s) bool
+            if compact:
+                segment = sample2["segment"]
+                segment = (
+                    segment.unique(return_inverse=True)[1].reshape(segment.shape).byte()
+                )
+                sample2["segment"] = segment
 
         return sample2
 
@@ -104,16 +100,6 @@ class ClevrTex(ptud.Dataset):
         dst_dir=Path("clevrtex"),
     ):
         """
-        Download data from https://www.robots.ox.ac.uk/~vgg/data/clevrtex
-        - Original Version (for train)
-            - ClevrTex (part 1, 4.7 GB)
-            - ClevrTex (part 2, 4.7 GB)
-            - ClevrTex (part 3, 4.7 GB)
-            - ClevrTex (part 4, 4.7 GB)
-            - ClevrTex (part 5, 4.7 GB)
-        - Also its variant (for val)
-            - ClevrTex-OOD test set (5.3 GB)
-
         Structure dataset as follows and run it!
         - clevrtex_full  # as training set
           - 0
@@ -206,19 +192,18 @@ class ClevrTex(ptud.Dataset):
     @staticmethod
     def visualiz(image, segment=None, depth=None, wait=0):
         """
-        - image: rgb format, shape=(h,w,c=3), uint8
-        - segment: mask format, shape=(h,w,s), bool
+        - image: bgr format, shape=(h,w,c=3), uint8
+        - segment: index format, shape=(h,w), uint8
         - depth: shape=(h,w), uint8
         """
         assert image.ndim == 3 and image.shape[2] == 3 and image.dtype == np.uint8
 
-        cv2.imshow("i", cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+        cv2.imshow("i", image)
 
-        segment_viz = None
         if segment is not None:
-            assert segment.ndim == 3 and segment.dtype == np.bool
+            assert segment.ndim == 2 and segment.dtype == np.uint8
             segment_viz = draw_segmentation_np(image, segment, alpha=0.75)
-            cv2.imshow("s", cv2.cvtColor(segment_viz, cv2.COLOR_RGB2BGR))
+            cv2.imshow("s", segment_viz)
 
         if depth is not None:
             assert depth.ndim == 2 and depth.dtype == np.uint8

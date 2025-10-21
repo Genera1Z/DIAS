@@ -1,5 +1,9 @@
+from copy import deepcopy
+from operator import attrgetter
+import math
 import re
 
+from diffusers.models import AutoencoderKL, AutoencoderTiny
 from einops import rearrange
 import timm
 import torch as pt
@@ -135,40 +139,10 @@ class Sequential(nn.Sequential):
         return input
 
 
-ModuleList = nn.ModuleList
-
-
 ####
 
 
-Embedding = nn.Embedding
-
-
-Conv2d = nn.Conv2d
-
-
-PixelShuffle = nn.PixelShuffle
-
-
-ConvTranspose2d = nn.ConvTranspose2d
-
-
-AdaptiveAvgPool2d = nn.AdaptiveAvgPool2d
-
-
 Identity = nn.Identity
-
-
-ReLU = nn.ReLU
-
-
-GELU = nn.GELU
-
-
-SiLU = nn.SiLU
-
-
-Mish = nn.Mish
 
 
 class Interpolate(nn.Module):
@@ -183,13 +157,7 @@ class Interpolate(nn.Module):
         return ptnf.interpolate(input, self.size, self.scale_factor, self.interp)
 
 
-Dropout = nn.Dropout
-
-
 Linear = nn.Linear
-
-
-GroupNorm = nn.GroupNorm
 
 
 LayerNorm = nn.LayerNorm
@@ -198,16 +166,7 @@ LayerNorm = nn.LayerNorm
 ####
 
 
-MultiheadAttention = nn.MultiheadAttention
-
-
-TransformerEncoderLayer = nn.TransformerEncoderLayer
-
-
 TransformerDecoderLayer = nn.TransformerDecoderLayer
-
-
-TransformerEncoder = nn.TransformerEncoder
 
 
 TransformerDecoder = nn.TransformerDecoder

@@ -1,3 +1,4 @@
+import math
 import random
 
 import numpy as np
@@ -70,55 +71,6 @@ class Normalize:
         return sample
 
 
-class PadTo1:
-    """Can work as PadSlot.
-    Pad a dimension of a tensor to a given size."""
-
-    def __init__(self, keys, dim, size: int, mode="right", value=0):
-        """
-        - size:
-        - mode: ``left``, ``sides`` (pad to both left and right), ``right``
-        """
-        self.keys = keys
-        self.dim = dim
-        self.size = size
-        self.mode = mode
-        self.value = value
-
-    def __call__(self, **sample: dict) -> dict:
-        # pack = pack.copy()
-        for key in self.keys:
-            input = DictTool.getattr(sample, key)
-            size = input.size(self.dim)
-            if self.size <= size:
-                assert self.size >= size, "self.size should not be smaller than size"
-                continue
-            left, right = __class__.calc_padding(self.size, size, self.mode)
-            output = __class__.pad1(input, self.dim, left, right, self.value)
-            assert output.size(self.dim) == self.size
-            DictTool.setattr(sample, key, output)
-        return sample
-
-    @staticmethod
-    def calc_padding(target, size, mode):
-        if mode == "left":
-            left = target - size
-        elif mode == "sides":
-            left = (target - size) // 2
-        elif mode == "right":
-            left = 0
-        else:
-            raise "ValueError"
-        right = target - size - left
-        return left, right
-
-    @staticmethod
-    def pad1(input, dim, left, right, pad_value=0):
-        """from the last dim to first"""
-        pad = [0, 0] * (input.ndim - dim - 1) + [left, right]
-        return ptnf.pad(input, pad, value=pad_value)
-
-
 class RandomFlip:
     """Flip tensor randomly along one of the given dimensions.
     Support bbox shape (..,c=4)."""
@@ -170,7 +122,6 @@ class Resize:
         - max_size: int; resize along the long side
         - c: 1 means tensor shape=(..,c,h,w); 0 means tensor=(..,h,w)
         """
-        assert "flow" not in keys  # TODO XXX not support optical flow resize
         self.keys = keys
         self.interp = INTERPOLATS[interp]
         self.resize = ptvt2.Resize(

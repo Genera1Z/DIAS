@@ -34,21 +34,12 @@ For my implementation of baseline methods and their model checkpoints, please vi
 
 ## 🌟 Highlights
 
-⭐⭐⭐ ***Inherited from GitHub repo [VQ-VFM-OCL](https://github.com/Genera1Z/VQ-VFM-OCL).*** ⭐⭐⭐
-
 - ✅ **fp16 fast training** [Automatic mixed precision](https://docs.pytorch.org/tutorials/recipes/recipes/amp_recipe.html) training (fp32+fp16) is enabled. Most of the training can be finished less than 4 or 8 hours (for image or video OCL respectively) using one V100 GPU.
 - ✅ **less I/O overhead** Datasets are stored in [LMBD](https://lmdb.readthedocs.io) database format to save I/O overhead, beneficial especially on computing cluster.
 
 - ✅ **config-driven experiment** This is totally config-driven framework, largely inspired by [OpenMMLab](https://github.com/open-mmlab), but with much less capsulation.
 
-- ✅ **strong baselines** <!-- All models requiring VAE are implemented with StableDiffusion pretrained VAE [TinyVAE](https://huggingface.co/docs/diffusers/v0.30.1/en/api/models/autoencoder_tiny); --> All models are trained with [strong](https://arxiv.org/abs/2206.07764) data augmentations; All models employ vision foundation model [DINO2](https://huggingface.co/docs/transformers/en/model_doc/dinov2) as their backbone.
-
-
-
-## 🚑️ Changelogs
-
-- ⭐⭐⭐ [2025/10/21] ⭐⭐⭐ **Object discovery accuracy values are updated for version 3. Check this table file [acc-v3.xlsx](acc-v3.xlsx) for details**.
-- [2025/10/20] Version 3 (based on VQ-VFM-OCL): re-implement segmentation evaluation; corresponding new dataset lmdb files are uploaded. Thus, object discovery acc could change a little, especially ARI values.
+- ✅ **strong baselines** All models requiring VAE are implemented with StableDiffusion pretrained VAE [TinyVAE](https://huggingface.co/docs/diffusers/v0.30.1/en/api/models/autoencoder_tiny); All models are trained with [strong](https://arxiv.org/abs/2206.07764) data augmentations; All models employ vision foundation model [DINO2](https://huggingface.co/docs/transformers/en/model_doc/dinov2) as their backbone.
 
 
 
@@ -72,7 +63,9 @@ For my implementation of baseline methods and their model checkpoints, please vi
 
 [Releases](https://github.com/Genera1Z/DIAS/releases).
 ```shell
-- archive-dias/      # our DIAS models and logs
+- dias_r-clevrtex/      # our DIAS models and logs
+- dias_r-coco/
+- dias_r-voc/
 ```
 
 
@@ -89,14 +82,16 @@ Converted datasets, including ClevrTex, COCO, VOC and MOVi-D are available as [r
 ## 🧠 Model Checkpoints & Training Logs
 
 **The checkpoints and training logs (@ random seeds 42, 43 and 44) for all models in the table above** are available as [releases](https://github.com/Genera1Z/DIAS/releases).
-- [archive-dias](https://github.com/Genera1Z/DIAS/releases/tag/archive-dias): model checkpoints and train/val logs of DIAS trained on datasets CLEVRTEX, Microsoft COCO and Pascal VOC.
+- [dias_r-clevrtex](https://github.com/Genera1Z/DIAS/releases/tag/dias_r-clevrtex): model checkpoints and train/val logs of DIAS trained on datasets CLEVRTEX.
+- [dias_r-coco](https://github.com/Genera1Z/DIAS/releases/tag/dias_r-coco): model checkpoints and train/val logs of DIAS trained on datasets Microsoft COCO.
+- [dias_r-voc](https://github.com/Genera1Z/DIAS/releases/tag/dias_r-voc): model checkpoints and train/val logs of DIAS trained on datasets Pascal VOC.
 
 
 
 ## 🔥 How to Use
 
 
-### (1) Install
+### (1) Install requirements
 
 (Using Python version 3.11)
 ```shell
@@ -105,7 +100,7 @@ pip install -r requirements.txt
 Use package versions no older than the specification.
 
 
-### (2) Prepare
+### (2) Prepare datasets
 
 Download **converted datasets** or convert original datasets into LMDB format: 
 ```shell
@@ -122,13 +117,13 @@ python train.py
 ```
 But **firstly** change the arguments marked with ```TODO XXX``` to your needs.
 
-For example,
 ```shell
 python train.py \
     --seed 42 \
     --cfg_file config-dias/dias_r-coco.py \
     --data_dir path/to/coco
 ```
+
 
 
 ### (4) Evaluate
@@ -153,8 +148,7 @@ model = ClassName(key1=value1,..)
 ```
 
 2. All config files follow a similar structure, and you can use file comparator [Meld](https://meldmerge.org) with [VSCode](https://code.visualstudio.com/) plugin [Meld Diff](https://marketplace.visualstudio.com/items?itemName=danielroedl.meld-diff) to check their differences.
-
-<img src="https://github.com/Genera1Z/VQ-VFM-OCL/raw/main/res/meld_diff.png" style="width:100%;">
+<img src="https://github.com/Genera1Z/VQ-VFM-OCL/blob/main/res/meld_diff.png" style="width:100%;">
 
 
 

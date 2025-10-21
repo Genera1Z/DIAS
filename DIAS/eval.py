@@ -21,8 +21,7 @@ def val_epoch(cfg, dataset_v, model, loss_fn, acc_fn_v, callback_v):
     pack.callback_v = callback_v
     pack.epoch = 0
 
-    is_img = True  # TODO XXX
-    pack2 = Config({})
+    is_img = False  # TODO XXX
 
     mean = pt.from_numpy(np.array(cfg.IMAGENET_MEAN, "float32"))
     std = pt.from_numpy(np.array(cfg.IMAGENET_STD, "float32"))
@@ -33,6 +32,8 @@ def val_epoch(cfg, dataset_v, model, loss_fn, acc_fn_v, callback_v):
     [_.before_epoch(**pack) for _ in pack.callback_v]
 
     for i, batch in enumerate(pack.dataset_v):
+        # if i < 141 or i > 141:  # TODO XXX
+        #     continue
         pack.batch = {k: v.cuda() for k, v in batch.items()}
 
         [_.before_step(**pack) for _ in pack.callback_v]
@@ -42,6 +43,12 @@ def val_epoch(cfg, dataset_v, model, loss_fn, acc_fn_v, callback_v):
             [_.after_forward(**pack) for _ in pack.callback_v]
             pack.loss = pack.loss_fn(**pack)
         pack.acc = pack.acc_fn_v(**pack)
+
+        if 0:  # TODO XXX
+            for image, segment in zip(pack.batch["image"], pack.output["segment2"]):
+                pack.dataset_v.dataset.visualiz(
+                    image, segment=segment, inorm=[mean, std], wait=0
+                )
 
         if 0:  # TODO XXX
             # makdir
@@ -66,7 +73,9 @@ def val_epoch(cfg, dataset_v, model, loss_fn, acc_fn_v, callback_v):
                         _[None] for _ in (img_gt, seg_gt, seg_pd)
                     ]
                 for tcnt, (igt, sgt, spd) in enumerate(zip(img_gt, seg_gt, seg_pd)):
-                    igt = igt.permute(1, 2, 0).cpu().numpy()
+                    igt = cv2.cvtColor(
+                        igt.permute(1, 2, 0).cpu().numpy(), cv2.COLOR_RGB2BGR
+                    )
                     sgt = sgt.cpu().numpy()
                     spd = spd.cpu().numpy()
                     save_path = save_dn / f"{cnt:06d}-{tcnt:06d}"
@@ -83,35 +92,15 @@ def val_epoch(cfg, dataset_v, model, loss_fn, acc_fn_v, callback_v):
 
     [_.after_epoch(**pack) for _ in pack.callback_v]
 
-    for cb in pack.callback_v:
-        if cb.__class__.__name__ == "AverageLog":
-            pack2.log_info = cb.mean()
-            break
-        elif cb.__class__.__name__ == "HandleLog":
-            pack2.log_info = cb.handle()
-            break
 
-    return pack2
-
-
-def main_eval_single(
-    # cfg_file="config-smoothsa/smoothsa_r_recogn-coco.py",  # 6680
-    # ckpt_file="archive-recogn/smoothsa_r_recogn-coco/42/0002.pth",
-    # cfg_file="config-spot/spot_r_recogn-coco.py",  # 6570
-    # ckpt_file="archive-recogn/spot_r_recogn-coco/42/0002.pth",
-    # cfg_file="config-smoothsa/smoothsav_r_recogn-ytvis.py",  # 8836
-    # ckpt_file="archive-recogn/smoothsav_r_recogn-ytvis/42/0011.pth",
-    # cfg_file="config-slotcontrast/slotcontrast_r_recogn-ytvis.py",  # 9151
-    # ckpt_file="archive-recogn/slotcontrast_r_recogn-ytvis/42/0010.pth",
-    # cfg_file="config-smoothsa/smoothsav_r-ytvis.py",
-    # ckpt_file="../_20250620-dias0_randsfq_smoothsa-ckpt/20250620-dias0_randsfq_smoothsa-smoothsav-vvv/save/smoothsav_r-ytvis/42-0159.pth",
-    cfg_file="config-slotcontrast/slotcontrast_r-ytvis.py",
-    ckpt_file="../_20250620-dias0_randsfq_smoothsa-ckpt/20250620-dias0_randsfq_smoothsa-slotcontrast_ce/save/slotcontrast_r-ytvis/42-0155.pth",
+def main(
+    # cfg_file="config-dias/dias_r-clevrtex.py",
+    # cfg_file="config-dias/dias_r-coco.py",
+    cfg_file="config-dias/dias_r-voc.py",
+    # ckpt_file="../dias_r-clevrtex/42-0029.pth",
+    # ckpt_file="../dias_r-coco/42-0027.pth",
+    ckpt_file="../dias_r-voc/42-0529.pth",
 ):
-    # data_dir = "/scratch/work/zhaor5/datasets"  # TODO XXX
-    # data_dir = "/scratch/project_2008396/Datasets"
-    # data_dir = os.environ["LOCAL_SCRATCH"]
-    # print(f"data_dir: {data_dir}")
     data_dir = "/media/GeneralZ/Storage/Static/datasets"  # TODO XXX
     pt.backends.cudnn.benchmark = True
 
@@ -132,10 +121,9 @@ def main_eval_single(
     dataset_v = build_from_config(cfg.dataset_v)
     dataload_v = DataLoader(
         dataset_v,
-        cfg.batch_size_v // 2,  # TODO XXX
+        cfg.batch_size_v // 2,  # TODO XXX  # 1,
         shuffle=False,
         num_workers=cfg.num_work,
-        collate_fn=build_from_config(cfg.collate_fn_v),
         pin_memory=True,
     )
 
@@ -160,73 +148,14 @@ def main_eval_single(
 
     cfg.callback_v = [_ for _ in cfg.callback_v if _.type.__name__ != "SaveModel"]
     for cb in cfg.callback_v:
-        if cb.type.__name__ in ["AverageLog", "HandleLog"]:
+        if cb.type.__name__ == "AverageLog":
             cb.log_file = None  # TODO XXX change to current log file for eval
     callback_v = build_from_config(cfg.callback_v)
 
     ## do eval
 
-    pack2 = val_epoch(cfg, dataload_v, model, loss_fn, acc_fn_v, callback_v)
-
-    ## dump data
-
-    if hasattr(pack2, "query"):
-        query = np.concatenate(pack2.query, axis=0)  # (i*b,t,n,c)
-        np.savez_compressed("query.npz", query)
-
-    if hasattr(pack2, "slotz"):
-        slotz = np.concatenate(pack2.slotz, axis=0)
-        np.savez_compressed("slotz.npz", slotz)
-
-    return pack2.log_info
-
-
-def main_eval_multi():
-    cfg_files = [
-        "config-dias/dias_r-clevrtex.py",
-        "config-dias/dias_r-coco.py",
-        "config-dias/dias_r-voc.py",
-    ]
-    ckpt_files = [
-        [
-            "archive-dias/dias_r-clevrtex/42-0029.pth",
-            "archive-dias/dias_r-clevrtex/43-0025.pth",
-            "archive-dias/dias_r-clevrtex/44-0029.pth",
-        ],
-        [
-            "archive-dias/dias_r-coco/42-0027.pth",
-            "archive-dias/dias_r-coco/43-0018.pth",
-            "archive-dias/dias_r-coco/44-0016.pth",
-        ],
-        [
-            "archive-dias/dias_r-voc/42-0529.pth",
-            "archive-dias/dias_r-voc/43-0366.pth",
-            "archive-dias/dias_r-voc/44-0475.pth",
-        ],
-    ]
-
-    assert len(cfg_files) == len(ckpt_files)
-
-    log_file = Path("eval_multi.csv")
-    log_file.touch()
-    keys = ("ari", "ari_fg", "mbo", "miou")
-    for cfgf, ckptfs in zip(cfg_files, ckpt_files):
-        cfgf = Path(cfgf)
-        for ckptf in ckptfs:
-            ckptf = Path(ckptf)
-            cname = ckptf.parent.name
-            seed = int(ckptf.name.split("-")[0])
-            assert cname == cfgf.name[:-3]
-            print(f"###\n{cname}\n###")
-            print(cfgf.as_posix(), ckptf.as_posix())
-            eval_info = main_eval_single(cfgf, ckptf)
-            values = [eval_info[_] for _ in keys]
-            values_str = ",".join([f"{_:.8f}" for _ in values])
-            with open(log_file, "a") as f:
-                f.writelines(f"{cname}-{seed},{values_str}\n")
-    return
+    val_epoch(cfg, dataload_v, model, loss_fn, acc_fn_v, callback_v)
 
 
 if __name__ == "__main__":
-    # main_eval_single()
-    main_eval_multi()
+    main()

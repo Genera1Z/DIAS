@@ -10,3 +10,5 @@ env/
 .idea/
 
 .ipynb_checkpoints/
+
+archive-*

@@ -8,8 +8,7 @@ from object_centric_bench.datum import (
     Normalize,
     CenterCrop,
     Lambda,
-    PascalVOC,
-    PadToMax1,
+    MSCOCO,
 )
 from object_centric_bench.learn import (
     Adam,
@@ -47,13 +46,13 @@ from object_centric_bench.util_model import interpolat_argmax_attent
 
 ### global
 
-max_num = 6
+max_num = 7
 resolut0 = [256, 256]
 resolut1 = [16, 16]
 emb_dim = 256
 vfm_dim = 384
 
-total_step = 50000  # 100000 better
+total_step = 100000  # 100000 better
 val_interval = total_step // 40
 batch_size_t = 64 // 2  # 64 better
 batch_size_v = batch_size_t
@@ -79,21 +78,21 @@ transform_v = [
     dict(type=Normalize, keys=["image"], mean=IMAGENET_MEAN, std=IMAGENET_STD),
 ]
 dataset_t = dict(
-    type=PascalVOC,
-    data_file="voc/train.lmdb",
+    type=MSCOCO,
+    data_file="coco/train.lmdb",
     extra_keys=["segment"],
     transform=dict(type=Compose, transforms=transform_t),
     base_dir=...,
 )
 dataset_v = dict(
-    type=PascalVOC,
-    data_file="voc/val.lmdb",
+    type=MSCOCO,
+    data_file="coco/val.lmdb",
     extra_keys=["segment"],
     transform=dict(type=Compose, transforms=transform_v),
     base_dir=...,
 )
-collate_fn_t = dict(type=PadToMax1, keys=["segment"], dims=[2])
-collate_fn_v = collate_fn_t
+collate_fn_t = None
+collate_fn_v = None
 
 ### model
 
@@ -211,7 +210,7 @@ _acc_dict_ = dict(
     transform=dict(
         type=Lambda,
         ikeys=[["input", "target"]],
-        func=lambda _: rearrange(_, "b h w s -> b (h w) s"),
+        func=lambda _: rearrange(_, "b h w c -> b (h w) c"),
     ),
 )
 acc_fn_t = dict(
@@ -248,11 +247,14 @@ before_step = [
 after_forward = [
     dict(
         type=Lambda,
-        ikeys=[["output.attent2"]],  # (b,s,h,w) -> (b,h,w,s)
-        func=lambda _: ptnf.one_hot(
-            interpolat_argmax_attent(_.detach(), size=resolut0).long()
-        ).bool(),
+        ikeys=[["output.attent2"]],  # (b,s,h,w) -> (b,h,w)
+        func=lambda _: interpolat_argmax_attent(_.detach(), size=resolut0),
         okeys=[["output.segment2"]],
+    ),
+    dict(
+        type=Lambda,  # (b,h,w) -> (b,h,w,s)
+        ikeys=[["output.segment2", "batch.segment"]],
+        func=lambda _: ptnf.one_hot(_.long()),
     ),
 ]
 callback_t = [

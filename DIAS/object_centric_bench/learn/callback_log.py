@@ -13,38 +13,37 @@ class AverageLog(Callback):
     def __init__(
         self, log_file=None, epoch_key="epoch", loss_key="loss", acc_key="acc"
     ):
-        super().__init__()
         self.log_file = log_file
         self.epoch_key = epoch_key
         self.loss_key = loss_key
         self.acc_key = acc_key
         self.idx = None
-        self.state_dict = {}
+        self.current_dict = {}
 
     @pt.inference_mode()
     def index(self, epoch, isval):
         self.idx = f"{epoch}" if not isval else f"{epoch}/val"
-        self.state_dict.clear()
+        self.current_dict.clear()
 
     @pt.inference_mode()
     def append(self, loss, acc):
         for k, v in {**loss, **acc}.items():
             assert len(v) == 2  # (loss/acc,valid)
             v = tuple([_.detach().cpu().numpy() for _ in v])
-            if k in self.state_dict:
-                self.state_dict[k].append(v)
+            if k in self.current_dict:
+                self.current_dict[k].append(v)
             else:
-                self.state_dict[k] = [v]
+                self.current_dict[k] = [v]
 
     @pt.inference_mode()
     def mean(self):
         avg_dict = {}
-        for k, v in self.state_dict.items():
+        for k, v in self.current_dict.items():
             metric, valid = list(zip(*v))
             metric = np.concatenate(metric, 0)  # concat all batches  # (b,..)
             valid = np.concatenate(valid, 0)  # (b,)
             metric2 = metric[valid]  # keep the valid ones  # (?,..)
-            v2 = np.mean(metric2, 0)  # .round(8) can cause nan
+            v2 = metric2.mean(0)  # .round(8) can cause nan
             avg_dict[k] = v2.tolist()
         if self.log_file:
             __class__.save(self.idx, avg_dict, self.log_file)
@@ -90,7 +89,6 @@ class SaveModel(Callback):
         step_count_key="step_count",
         model_key="model",
     ):
-        super().__init__()
         self.save_dir = save_dir
         self.since_step = since_step  # self.after_step is taken
         self.weights_only = weights_only
