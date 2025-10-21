@@ -24,6 +24,8 @@ Please note that features *slot pruning*, along with *re-initialization*, are no
 
 ### (1) ⭐⭐⭐ Re-evaluated Performance Values @ Version 3 ⭐⭐⭐
 
+**Object discovery**:
+
 |                 |    ari   |   arifg  |    mbo   |   miou   |
 |-----------------|:--------:|:--------:|:--------:|:--------:|
 | dias_r-clevrtex | 80.9±0.3 | 79.1±0.3 | 63.3±0.1 | 61.9±0.0 |
@@ -61,7 +63,7 @@ For my implementation of baseline methods and their model checkpoints, please vi
 ## 🚑️ Changelogs
 
 - ⭐⭐⭐ [2025/10/21] ⭐⭐⭐ **Object discovery accuracy values are updated for version 3. Check this table file [acc-v3.xlsx](acc-v3.xlsx) for details**.
-- [2025/10/20] Version 3 (based on VQ-VFM-OCL): re-implement segmentation evaluation; corresponding new dataset lmdb files are uploaded. Thus, object discovery acc could change a little, especially ARI values.
+- [2025/10/20] Version 3 (based on [VQ-VFM-OCL](https://github.com/Genera1Z/VQ-VFM-OCL)): re-implement segmentation evaluation; corresponding new dataset lmdb files are uploaded. Thus, object discovery acc could change a little, especially ARI values.
 
 
 
