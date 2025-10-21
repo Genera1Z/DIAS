@@ -20,6 +20,19 @@ Unlike popular solutions based on dense feature maps, Object-Centric Learning (O
 Official implementation of ACM MM 2025 paper "**Slot Attention with Re-Initialization and Self-Distillation**".
 Please note that features *slot pruning*, along with *re-initialization*, are not included.
 
+## 🏆 Performance
+
+### (1) ⭐⭐⭐ Re-evaluated Performance Values @ Version 3 ⭐⭐⭐
+
+|                 |    ari   |   arifg  |    mbo   |   miou   |
+|-----------------|:--------:|:--------:|:--------:|:--------:|
+| dias_r-clevrtex | 80.9±0.3 | 79.1±0.3 | 63.3±0.1 | 61.9±0.0 |
+| dias_r-coco     | 25.6±0.1 | 41.2±0.3 | 31.7±0.1 | 30.2±0.1 |
+| dias_r-voc      | 30.9±0.5 | 33.5±0.7 | 43.4±0.5 | 42.4±0.5 |
+
+
+### (2) Old Performance Values
+
 **Object discovery performance**.
 
 | DIAS @ DINO2-S/14, 256x256 (224)    |    ARI   |   ARIfg  |    mBO   |   mIoU   |
