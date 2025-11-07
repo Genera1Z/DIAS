@@ -11,4 +11,4 @@ from .transform import (
     CenterCrop,
     Resize,
 )
-from .collate import PadToMax1
+from .collate import ClPadToMax1, ClPadTo1, DefaultCollate
