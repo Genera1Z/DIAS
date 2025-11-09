@@ -1,4 +1,4 @@
-# DIAS : Slot Attention with Re-Initialization and Self-Distillation
+# `DIAS` Slot Attention with Re-Initialization and Self-Distillation
 
 
 
