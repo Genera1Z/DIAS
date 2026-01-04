@@ -49,14 +49,7 @@ For my implementation of baseline methods and their model checkpoints, please vi
 
 ## 🌟 Highlights
 
-⭐⭐⭐ ***Inherited from GitHub repo [VQ-VFM-OCL](https://github.com/Genera1Z/VQ-VFM-OCL).*** ⭐⭐⭐
-
-- ✅ **fp16 fast training** [Automatic mixed precision](https://docs.pytorch.org/tutorials/recipes/recipes/amp_recipe.html) training (fp32+fp16) is enabled. Most of the training can be finished less than 4 or 8 hours (for image or video OCL respectively) using one V100 GPU.
-- ✅ **less I/O overhead** Datasets are stored in [LMBD](https://lmdb.readthedocs.io) database format to save I/O overhead, beneficial especially on computing cluster.
-
-- ✅ **config-driven experiment** This is totally config-driven framework, largely inspired by [OpenMMLab](https://github.com/open-mmlab), but with much less capsulation.
-
-- ✅ **strong baselines** <!-- All models requiring VAE are implemented with StableDiffusion pretrained VAE [TinyVAE](https://huggingface.co/docs/diffusers/v0.30.1/en/api/models/autoencoder_tiny); --> All models are trained with [strong](https://arxiv.org/abs/2206.07764) data augmentations; All models employ vision foundation model [DINO2](https://huggingface.co/docs/transformers/en/model_doc/dinov2) as their backbone.
+⭐⭐⭐ ***Please check GitHub repo [VQ-VFM-OCL](https://github.com/Genera1Z/VQ-VFM-OCL).*** ⭐⭐⭐
 
 
 
@@ -80,7 +73,6 @@ For my implementation of baseline methods and their model checkpoints, please vi
     - dias.py           # *** for our DIAS model building ***
     - ...
   - learn/              # metrics, optimizers and callbacks
-- convert.py
 - train.py
 - eval.py
 - requirements.txt
@@ -111,73 +103,51 @@ Datasets ClevrTex, COCO and VOC, which are converted into LMDB format and can be
 
 ## 🔥 How to Use
 
+Take DIAS on COCO as an example.
 
-### (1) Install
+**(1) Environment**
 
-(Using Python version 3.11)
+To set up the environment, run:
 ```shell
+# python 3.11
 pip install -r requirements.txt
 ```
-Use package versions no older than the specification.
 
+**(2) Dataset**
 
-### (2) Prepare
+To prepare the dataset, download ***Converted Datasets*** and unzip to `path/to/your/dataset/`. Or convert them by yourself according to ```XxxDataset.convert_dataset()``` docs.
 
-Download **converted datasets** or convert them by yourself according to ```XxxDataset.convert_dataset()``` docs.
+**(3) Train**
 
-
-### (3) Train
-
-Run training:
-```shell
-python train.py
-```
-But **firstly** change the arguments marked with ```TODO XXX``` to your needs.
-
-For example,
+To train the model, run:
 ```shell
 python train.py \
     --seed 42 \
     --cfg_file config-dias/dias_r-coco.py \
-    --data_dir path/to/coco
+    --data_dir path/to/your/dataset \
+    --save_dir save
 ```
 
+**(4) Evaluate**
 
-### (4) Evaluate
-
-Run evaluation:
+To evaluate the model, run:
 ```shell
-python eval.py
+python eval.py \
+    --cfg_file config-dias/dias_r-coco.py \
+    --data_dir path/to/your/dataset \
+    --ckpt_file archive-dias/dias_r-coco/best.pth \
+    --is_viz True
+# object discovery accuracy values will be printed in the terminal
+# object discovery visualization will be saved to ./dias_r-coco/
 ```
-But **firstly** modify places marked with ``TODO XXX`` according to your needs.
-
-
-
-## 💡 Tips
-
-1. Any config file can be converted into typical Python code by changing from
-```Python
-model = dict(type=ClassName, key1=value1,..)
-```
-to
-```Python
-model = ClassName(key1=value1,..)
-```
-
-2. All config files follow a similar structure, and you can use file comparator [Meld](https://meldmerge.org) with [VSCode](https://code.visualstudio.com/) plugin [Meld Diff](https://marketplace.visualstudio.com/items?itemName=danielroedl.meld-diff) to check their differences.
-
-<img src="https://github.com/Genera1Z/VQ-VFM-OCL/raw/main/res/meld_diff.png" style="width:100%;">
 
 
 
 ## 🤗 Contact & Support
 
-I am now working on Object-Centric Learning (OCL). If you have any cool ideas or issues, do not hasitate to contact me!
-- Website: [genera1z.github.io](https://genera1z.github.io)
-- WeChat: Genera1Z
-- GoogleScholar: [MqlwrKAAAAAJ](https://scholar.google.com/citations?hl=en&user=MqlwrKAAAAAJ&view_op=list_works&sortby=pubdate)
-- LinkedIn: [rongzhen-zhao-3b7215247](https://www.linkedin.com/in/rongzhen-zhao-3b7215247)
-- eMail: rongzhen.zhao@aalto.fi, zhaorongzhenagi@gmail.com
+If you have any issues on this repo or cool ideas on OCL, please do not hesitate to contact me!
+- page: https://genera1z.github.io
+- email: rongzhen.zhao@aalto.fi, zhaorongzhenagi@gmail.com
 
 If you are applying OCL (not limited to this repo) to tasks like **visual question answering**, **visual prediction/reasoning**, **world modeling** and **reinforcement learning**, let us collaborate!
 

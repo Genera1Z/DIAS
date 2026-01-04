@@ -2,6 +2,7 @@
 Copyright (c) 2024 Genera1Z
 https://github.com/Genera1Z
 """
+
 import random
 
 import numpy as np
@@ -331,4 +332,3 @@ class CenterCrop:
         b = t + size[0]
         r = l + size[1]
         return t, l, b, r
-

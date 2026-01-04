@@ -2,6 +2,7 @@
 Copyright (c) 2024 Genera1Z
 https://github.com/Genera1Z
 """
+
 from einops import rearrange, repeat
 import torch as pt
 import torch.nn as nn
@@ -102,15 +103,15 @@ class DIAS(nn.Module):
         encode = self.encode_project(encode)
 
         query = self.initializ(b if condit is None else condit)  # (b,n,c)
-        slotz, attent = self.aggregat(encode, query)
-        attent = [rearrange(_, "b n (h w) -> b n h w", h=h) for _ in attent]
+        slotz, attenta = self.aggregat(encode, query)
+        attenta = [rearrange(_, "b n (h w) -> b n h w", h=h) for _ in attenta]
 
         clue = rearrange(feature, "b c h w -> b (h w) c")
-        recon, attent2 = self.decode(clue, slotz)  # (b,h*w,c)
+        recon, attentd = self.decode(clue, slotz)  # (b,h*w,c)
         recon = rearrange(recon, "b (h w) c -> b c h w", h=h)
-        attent2 = rearrange(attent2, "b n (h w) -> b n h w", h=h)
+        attentd = rearrange(attentd, "b n (h w) -> b n h w", h=h)
 
-        return feature, slotz, attent, attent2, recon
+        return feature, slotz, attenta, recon, attentd
 
 
 class ARRandTransformerDecoder(nn.Module):
@@ -155,19 +156,6 @@ class ARRandTransformerDecoder(nn.Module):
             attent_hook_forward
         )
 
-        ### interaction asymmetry
-
-        self._interact = [None for _ in range(len(self.backbone.layers[:-1]))]
-        for l, layer in enumerate(self.backbone.layers[:-1]):
-
-            def interact_hook_forward(module, args, output):
-                self._interact[l] = output[1]
-
-            layer.multihead_attn.register_forward_pre_hook(
-                attent_hook_forward_pre, with_kwargs=True
-            )
-            layer.multihead_attn.register_forward_hook(interact_hook_forward)
-
     def forward(self, input, slots, smask=None, p=0.5):
         """
         input: target to be destructed, shape=(b,m=h*w,c)
@@ -182,12 +170,6 @@ class ARRandTransformerDecoder(nn.Module):
 
         # TODO XXX disable masking in val for attent2 !!!
 
-        # mim-predict-all-masked-tokens
-        # seg1:
-        # "ari": 0.20348355174064636, "ari_fg": 0.34435588121414185, "mbo": 0.29168349504470825, "miou": 0.2779198884963989
-        # seg2:  # TODO disable masking in val for attent2 !!!
-        # 'ari': 0.2038770616054535, 'ari_fg': 0.3444632291793823, 'mbo': 0.29167482256889343, 'miou': 0.27789679169654846
-
         if self.training:
             idxs = pt.vmap(  # (b,m)
                 lambda _: pt.randperm(m, device=device), randomness="different"
@@ -196,16 +178,9 @@ class ARRandTransformerDecoder(nn.Module):
 
             idxs0 = pt.arange(0, m, device=device)[None, :]  # (1,m)
             keep1 = pt.randint(0, m - 1, [b, 1], device=device)  # (b,1)
-            keep2 = (
-                pt.ones(b, 1, dtype=pt.long, device=device) * int(256 * 0.1) - 1
-            )  # TODO
-            # TODO XXX realize a Poisson: when in [0, 1], it is Poisson; when out, then uniformly re-distribute in [0, 1]
+            keep2 = pt.ones(b, 1, dtype=pt.long, device=device) * int(256 * 0.1) - 1
             cond = pt.rand(b, 1, device=device) < p
             keep = pt.where(cond, keep1, keep2)
-            # XXX 论文论述 XXX
-            # keep@0: SlotMixerDecoder
-            # 只预测下一个：ARTransformerDecoder
-            # 其中9种只预测下一个，AR9TransformerDecoder
             mask = idxs0 < keep  # (b,m)
 
             # shuffle tokens
@@ -233,10 +208,13 @@ class ARRandTransformerDecoder(nn.Module):
 
         memory = self.project2(slots)
         autoreg = self.backbone(
-            self.norm0(query), memory=memory, memory_key_padding_mask=smask
+            self.norm0(query),
+            memory=memory,
+            memory_key_padding_mask=None if smask is None else ~smask,
         )
         recon = self.readout(autoreg)  # (b,m,c)
         _, _, d = recon.shape
+        # print(recon.isnan().any())
 
         if self.training:
             idxs_inverse = idxs.argsort(1)[:, :, None]

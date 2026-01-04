@@ -2,6 +2,7 @@
 Copyright (c) 2024 Genera1Z
 https://github.com/Genera1Z
 """
+
 import torch as pt
 import torch.nn as nn
 
@@ -153,8 +154,6 @@ class NormalSeparat(nn.Module):
 
 class NormalShared(nn.Module):
     """Shared gaussian as queries."""
-
-    # TODO new trick: Conditional Random Initialization
 
     def __init__(self, num, dim):
         super().__init__()
