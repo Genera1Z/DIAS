@@ -88,20 +88,6 @@ def build_from_config(cfg):
             obj = cls_key(**cfg)  # MODULE_DICT[cls_key](**cfg)
         else:
             obj = cfg
-    # elif isinstance(cfg, DynamicConfig):
-    #     dcfg = cfg.__dict__.copy()  # TODO deepcopy ???
-    #     dcfg.pop("root")
-    #     if "clsdef" in dcfg:
-    #         clsdef = dcfg.pop("clsdef")
-    #     else:
-    #         clsdef = None
-    #     for k, v in dcfg.items():
-    #         v = eval(f"cfg.{k}")
-    #         dcfg[k] = build_from_config(v)
-    #     if clsdef is not None:
-    #         obj = clsdef(**dcfg)
-    #     else:
-    #         obj = cfg
     else:
         obj = cfg
     return obj

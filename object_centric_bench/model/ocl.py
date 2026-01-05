@@ -10,7 +10,7 @@ from .basic import MLP
 
 
 class SlotAttention(nn.Module):
-    """TODO XXX modularization/cgv: correct the wrong implementation!"""
+    """"""
 
     def __init__(
         self, num_iter, embed_dim, ffn_dim, dropout=0, kv_dim=None, trunc_bp=None
@@ -70,20 +70,6 @@ class SlotAttention(nn.Module):
         o = pt.einsum("bqv,bvc->bqc", a, v)
         return o, a0
 
-    """@staticmethod
-    def inverted_scaled_dot_product_attention(q, k, v, eps=1e-5, h=4):
-        q = rearrange(q, "b q (h d) -> (b h) q d", h=h)
-        k = rearrange(k, "b k (h d) -> (b h) k d", h=h)
-        v = rearrange(v, "b k (h d) -> (b h) k d", h=h)
-        scale = q.size(2) ** -0.5  # temperature
-        logit = pt.einsum("bqc,bkc->bqk", q * scale, k)
-        a0 = logit.softmax(1)  # inverted: softmax over query  # , logit.dtype
-        a = a0 / (a0.sum(2, keepdim=True) + eps)  # re-normalize over key
-        # a = self_dropout(a)
-        o = pt.einsum("bqv,bvc->bqc", a, v)
-        o = rearrange(o, "(b h) q d -> b q (h d)", h=h)
-        return o, a0"""
-
 
 class LearntPositionalEmbedding(nn.Module):
     """Support any dimension. Must be channel-last.
@@ -115,9 +101,6 @@ class LearntPositionalEmbedding(nn.Module):
         output: in shape (b,*r,c)
         """
         max_r = ", ".join([f":{_}" for _ in input.shape[1:-1]])
-        # TODO XXX support variant length
-        # pe = timm.layers.pos_embed.resample_abs_pos_embed(self.pe, ...)
-        # pe = self.pe[:, :max_resolut, :]
         pe = eval(f"self.pe[:, {max_r}, :]")
         output = input + pe
         if retp:
