@@ -145,7 +145,7 @@ python eval.py \
     --cfg_file config-dias/dias_r-coco.py \
     --data_dir path/to/your/dataset \
     --ckpt_file archive-dias/dias_r-coco/best.pth \
-    --is_viz True
+    --is_viz True \
     --is_img True
 # object discovery accuracy values will be printed in the terminal
 # object discovery visualization will be saved to ./dias_r-coco/
