@@ -2,6 +2,23 @@
 
 
 
+<br>
+<br>
+
+## ⚗️ (2026/01/06) Update !!!
+
+Please check our brand new OCL works:
+- **[RandSF.Q](https://github.com/Genera1Z/RandSF.Q)**: surpasses state-of-the-art OCL method, i.e., **SlotContrast**, on videos significantly, by **up to 10 points**!
+- **[SmoothSA](https://github.com/Genera1Z/SmoothSA)**: improves state-of-the-art OCL on both images and videos consistently **even further** through minimal architectural modification!
+
+<br>
+<br>
+<br>
+
+---
+
+
+
 [![](https://img.shields.io/badge/arXiv-2507.23755-red)](https://arxiv.org/abs/2507.23755)
 [![](https://img.shields.io/badge/license-MIT-orange)](LICENSE)
 [![](https://img.shields.io/badge/python-3.11-yellow)](https://www.python.org)
@@ -142,12 +159,6 @@ If you have any issues on this repo or cool ideas on OCL, please do not hesitate
 - email: rongzhen.zhao@aalto.fi, zhaorongzhenagi@gmail.com
 
 If you are applying OCL (not limited to this repo) to tasks like **visual question answering**, **visual prediction/reasoning**, **world modeling** and **reinforcement learning**, let us collaborate!
-
-
-
-## ⚗️ Further Research
-
-My further research works on OCL can be found in [my repos](https://github.com/Genera1Z?tab=repositories) or [my academic page](https://genera1z.github.io).
 
 
 

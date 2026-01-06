@@ -159,6 +159,8 @@ def main(args):
         cfg, dataload_v, model, loss_fn_v, acc_fn_v, callback_v, is_viz, is_img
     )
 
+    return pack2.log_info
+
 
 def main_eval_multi(args):
     cfg_files = [
@@ -183,6 +185,7 @@ def main_eval_multi(args):
             "archive-dias/dias_r-voc/44-0475.pth",
         ],
     ]
+    ckpt_base_dir = Path("/media/GeneralZ/Storage/Active/0_ckpt_dias_github")
 
     assert len(cfg_files) == len(ckpt_files)
 
@@ -192,7 +195,7 @@ def main_eval_multi(args):
     for cfgf, ckptfs in zip(cfg_files, ckpt_files):
         cfgf = Path(cfgf)
         for ckptf in ckptfs:
-            ckptf = Path(ckptf)
+            ckptf = ckpt_base_dir / ckptf
             cname = ckptf.parent.name
             seed = int(ckptf.name.split("-")[0])
             assert cname == cfgf.name[:-3]
@@ -237,5 +240,5 @@ def parse_args():
 
 
 if __name__ == "__main__":
-    main(parse_args())
-    # main_eval_multi(parse_args())
+    # main(parse_args())
+    main_eval_multi(parse_args())
