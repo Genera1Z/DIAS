@@ -240,5 +240,5 @@ def parse_args():
 
 
 if __name__ == "__main__":
-    # main(parse_args())
-    main_eval_multi(parse_args())
+    main(parse_args())
+    # main_eval_multi(parse_args())
