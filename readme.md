@@ -39,26 +39,13 @@ Please note that features *slot pruning*, along with *re-initialization*, are no
 
 ## 🏆 Performance
 
-### (1) ⭐⭐⭐ Re-evaluated Performance Values @ Version 3 ⭐⭐⭐
-
-**Object discovery**:
+**Object Discovery Performance**, detailed in [acc-v3.xlsx](acc-v3.xlsx).
 
 |                 |    ari   |   arifg  |    mbo   |   miou   |
 |-----------------|:--------:|:--------:|:--------:|:--------:|
 | dias_r-clevrtex | 80.9±0.3 | 79.1±0.3 | 63.3±0.1 | 61.9±0.0 |
 | dias_r-coco     | 25.6±0.1 | 41.2±0.3 | 31.7±0.1 | 30.2±0.1 |
 | dias_r-voc      | 30.9±0.5 | 33.5±0.7 | 43.4±0.5 | 42.4±0.5 |
-
-
-### (2) Old Performance Values
-
-**Object discovery performance**.
-
-| DIAS @ DINO2-S/14, 256x256 (224)    |    ARI   |   ARIfg  |    mBO   |   mIoU   |
-|:------------------|:--------:|:--------:|:--------:|:--------:|
-| CLEVRTEX #slot=11 | 80.9±0.3 | 79.1±0.3 | 63.3±0.0 | 61.9±0.0 |
-| MS COCO #slot=7   | 22.0±0.2 | 41.4±0.2 | 31.1±0.1 | 29.7±0.1 |
-| Pascal VOC #slot=6| 26.6±1.0 | 33.7±1.5 | 43.3±0.3 | 42.4±0.3 |
 
 For my implementation of baseline methods and their model checkpoints, please visit my repo [VQ-VFM-OCL](https://github.com/Genera1Z/VQ-VFM-OCL).
 
