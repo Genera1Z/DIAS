@@ -39,7 +39,9 @@ Please note that features *slot pruning*, along with *re-initialization*, are no
 
 ## 🏆 Performance
 
-**Object Discovery Performance**, detailed in [acc-v3.xlsx](acc-v3.xlsx).
+**Object Discovery Performance**
+
+Which are detailed in [acc-v3.xlsx](acc-v3.xlsx).
 
 |                 |    ari   |   arifg  |    mbo   |   miou   |
 |-----------------|:--------:|:--------:|:--------:|:--------:|
