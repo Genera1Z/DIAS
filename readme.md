@@ -41,7 +41,7 @@ Please note that features *slot pruning*, along with *re-initialization*, are no
 
 **Object Discovery Performance**
 
-Which are detailed in [acc-v3.xlsx](acc-v3.xlsx).
+Which are detailed in [acc-v3.xlsx](acc-v3.xlsx). (Encoding with backbone **DINO2-S/14** at resolution **256x256**/224)
 
 |                 |    ari   |   arifg  |    mbo   |   miou   |
 |-----------------|:--------:|:--------:|:--------:|:--------:|
