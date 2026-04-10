@@ -121,7 +121,7 @@ class ARRandTransformerDecoder(nn.Module):
 
     def __init__(
         self,
-        vfm_dim,
+        emb_dim,
         posit_embed,
         # posit_embed_hw,
         project1,
@@ -130,7 +130,7 @@ class ARRandTransformerDecoder(nn.Module):
         readout,
     ):
         super().__init__()
-        self.mask_token = nn.Parameter(pt.randn(1, 1, vfm_dim) * vfm_dim**-0.5)
+        self.mask_token = nn.Parameter(pt.randn(1, 1, emb_dim) * emb_dim**-0.5)
         assert hasattr(posit_embed, "pe")
         self.posit_embed = posit_embed  # 1d
         # self.posit_embed_hw = posit_embed_hw  # 2d
