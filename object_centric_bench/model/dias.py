@@ -3,7 +3,7 @@ Copyright (c) 2024 Genera1Z
 https://github.com/Genera1Z
 """
 
-from einops import rearrange, repeat
+from einops import rearrange
 import torch as pt
 import torch.nn as nn
 
